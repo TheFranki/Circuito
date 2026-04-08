@@ -1,14 +1,17 @@
 import { MongoClient } from 'mongodb';
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).send('Solo POST');
+  // Solo permitimos que el ESP32 nos envíe datos (POST)
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Método no permitido' });
+  }
 
   const client = new MongoClient(process.env.MONGODB_URI);
 
   try {
     await client.connect();
-    const database = client.db('SistemaAcceso');
-    const logs = database.collection('registros');
+    const database = client.db('Integracion'); // Nombre de tu base de datos
+    const logs = database.collection('historial');
 
     const nuevoRegistro = {
       uid: req.body.uid,
@@ -17,9 +20,11 @@ export default async function handler(req, res) {
     };
 
     await logs.insertOne(nuevoRegistro);
-    return res.status(200).json({ status: 'ok' });
+
+    return res.status(200).json({ status: 'Exito', mensaje: 'Registro guardado' });
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    console.error(error);
+    return res.status(500).json({ error: 'Error al conectar a MongoDB' });
   } finally {
     await client.close();
   }
