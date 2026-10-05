@@ -1,7 +1,6 @@
 import { MongoClient } from 'mongodb';
 
 export default async function handler(req, res) {
-  // Solo permitimos que el ESP32 nos envíe datos (POST)
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Método no permitido' });
   }
@@ -10,7 +9,7 @@ export default async function handler(req, res) {
 
   try {
     await client.connect();
-    const database = client.db('Integracion'); // Nombre de tu base de datos
+    const database = client.db('Integracion');
     const logs = database.collection('historial');
 
     const nuevoRegistro = {
